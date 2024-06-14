@@ -5,6 +5,6 @@ namespace Catalog.API.Data
     public interface IPlateRepository
     {
         public Task CreatePlate(CreatePlateRequest createPlateRequest);
-        public Task<PaginatedList<Plate>> GetPlates(int? pageNumber, string sortOrder);
+        public Task<PaginatedList<Plate>> GetPlates(int? pageNumber, string? sortOrder, string? searchString, string? currentFilter);
     }
 }

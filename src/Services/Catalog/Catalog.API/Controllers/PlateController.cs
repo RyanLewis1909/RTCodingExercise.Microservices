@@ -32,7 +32,7 @@ namespace Catalog.API.Controllers
         [HttpGet("GetPlateItems")]
         public async Task<ActionResult<GetPlateItemsResult>> GetPlateItems([FromQuery] GetPlateItemsRequest catalogItemsRequest)
         {
-            var plates = await _plateRepository.GetPlates(catalogItemsRequest.PageNumber, catalogItemsRequest.SortOrder);
+            var plates = await _plateRepository.GetPlates(catalogItemsRequest.PageNumber, catalogItemsRequest.SortOrder, catalogItemsRequest.SearchString, catalogItemsRequest.CurrentFilter);
             if (plates == null)
             {
                 return NotFound();

@@ -12,14 +12,24 @@
     @Html.ActionLink("Create New Plate", "Create")
 </p>
 
+<form asp-action="Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by initials or age: <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" />
+            <input type="submit" value="Search" class="btn btn-default" /> |
+            <a asp-action="Index">Back to Full List</a>
+        </p>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["RegSortParm"]">Registration</a>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["RegSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Registration</a>
             </th>
             <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["PriceSortParm"]">PurchasePrice</a>                
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["PriceSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">PurchasePrice</a>
             </th>
             <th>
                 SalePrice

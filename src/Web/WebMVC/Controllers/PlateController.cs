@@ -15,19 +15,23 @@ namespace WebMVC.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int? pageNumber, string sortOrder)
+        public async Task<IActionResult> Index(int? pageNumber, string? sortOrder, string? searchString, string? currentFilter)
         {
+            ViewData["CurrentSort"] = sortOrder;
             ViewData["RegSortParm"] = string.IsNullOrEmpty(sortOrder) ? "registration_desc" : "";
             ViewData["PriceSortParm"] = sortOrder == "PurchasePrice" ? "price_desc" : "PurchasePrice";
             var response = await _catalogService.GetPlateItems(new GetPlateItemsRequest
             {
                 PageNumber = pageNumber,
-                SortOrder = sortOrder
+                SortOrder = sortOrder,
+                SearchString = searchString,
+                CurrentFilter = currentFilter
             });
-            var model = new PaginatedList<Models.PlateModel>();
+            ViewData["CurrentFilter"] = searchString ?? currentFilter;
+            var model = new PaginatedList<PlateModel>();
             response.Plates.ForEach(x =>
             {
-                model.Add(new Models.PlateModel
+                model.Add(new PlateModel    
                 {
                     Id = x.Id,
                     Registration = x.Registration,

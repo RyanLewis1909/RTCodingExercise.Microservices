@@ -1,6 +1,8 @@
 ﻿using Catalog.API.Messages.Request;
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
+using static Humanizer.In;
 
 namespace Catalog.API.Data
 {
@@ -33,25 +35,39 @@ namespace Catalog.API.Data
             await _applicationDbContext.SaveChangesAsync();
         }
 
-        public async Task<PaginatedList<Plate>> GetPlates(int? pageNumber, string sortOrder)
+        public async Task<PaginatedList<Plate>> GetPlates(int? pageNumber, string? sortOrder, string? searchString, string? currentFilter)
         {
-            var plates = _applicationDbContext.Plates.AsQueryable().OrderBy(x => x.Registration);
+            var plates = _applicationDbContext.Plates.AsQueryable();
 
-            switch (sortOrder)
+            if (searchString != null)
             {
-                case "registration_desc":
-                    plates = plates.OrderByDescending(s => s.Registration);
-                    break;
-                case "PurchasePrice":
-                    plates = plates.OrderBy(s => s.PurchasePrice);
-                    break;
-                case "price_desc":
-                    plates = plates.OrderByDescending(s => s.PurchasePrice);
-                    break;
-                default:
-                    plates = plates.OrderBy(s => s.Registration);
-                    break;
+                pageNumber = 1;
             }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                // if only numbers assume age search
+                if (int.TryParse(searchString, out var age))
+                {
+                    plates = plates.Where(s => s.Numbers.ToString().Contains(age.ToString()));
+                }
+                else
+                {
+                    plates = plates.Where(s => !string.IsNullOrEmpty(s.Letters) && s.Letters.Contains(searchString));
+                }
+            }
+
+            plates = sortOrder switch
+            {
+                "registration_desc" => plates.OrderByDescending(s => s.Registration),
+                "PurchasePrice" => plates.OrderBy(s => s.PurchasePrice),
+                "price_desc" => plates.OrderByDescending(s => s.PurchasePrice),
+                _ => plates.OrderBy(s => s.Registration),
+            };
 
             // Default to 20 if not set
             var platePageSplit = _appSettings.PlatePageSplit ?? 20;
