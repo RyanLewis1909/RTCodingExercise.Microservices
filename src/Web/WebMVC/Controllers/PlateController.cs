@@ -15,11 +15,14 @@ namespace WebMVC.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int? pageNumber)
+        public async Task<IActionResult> Index(int? pageNumber, string sortOrder)
         {
+            ViewData["RegSortParm"] = string.IsNullOrEmpty(sortOrder) ? "registration_desc" : "";
+            ViewData["PriceSortParm"] = sortOrder == "PurchasePrice" ? "price_desc" : "PurchasePrice";
             var response = await _catalogService.GetPlateItems(new GetPlateItemsRequest
             {
-                PageNumber = pageNumber
+                PageNumber = pageNumber,
+                SortOrder = sortOrder
             });
             var model = new PaginatedList<Models.PlateModel>();
             response.Plates.ForEach(x =>

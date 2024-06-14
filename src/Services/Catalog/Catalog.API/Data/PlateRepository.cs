@@ -33,9 +33,25 @@ namespace Catalog.API.Data
             await _applicationDbContext.SaveChangesAsync();
         }
 
-        public async Task<PaginatedList<Plate>> GetPlates(int? pageNumber)
+        public async Task<PaginatedList<Plate>> GetPlates(int? pageNumber, string sortOrder)
         {
             var plates = _applicationDbContext.Plates.AsQueryable().OrderBy(x => x.Registration);
+
+            switch (sortOrder)
+            {
+                case "registration_desc":
+                    plates = plates.OrderByDescending(s => s.Registration);
+                    break;
+                case "PurchasePrice":
+                    plates = plates.OrderBy(s => s.PurchasePrice);
+                    break;
+                case "price_desc":
+                    plates = plates.OrderByDescending(s => s.PurchasePrice);
+                    break;
+                default:
+                    plates = plates.OrderBy(s => s.Registration);
+                    break;
+            }
 
             // Default to 20 if not set
             var platePageSplit = _appSettings.PlatePageSplit ?? 20;

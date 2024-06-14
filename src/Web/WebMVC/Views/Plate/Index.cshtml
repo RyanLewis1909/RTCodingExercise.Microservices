@@ -16,10 +16,10 @@
     <thead>
         <tr>
             <th>
-                Registration
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["RegSortParm"]">Registration</a>
             </th>
             <th>
-                PurchasePrice
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["PriceSortParm"]">PurchasePrice</a>                
             </th>
             <th>
                 SalePrice

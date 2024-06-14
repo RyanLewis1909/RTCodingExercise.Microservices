@@ -50,7 +50,7 @@ namespace WebMVC.Services
 
         public async Task<GetPlateItemsResult> GetPlateItems(GetPlateItemsRequest getPlateItemsRequest)
         {
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/Plate/GetPlateItems?PageNumber={getPlateItemsRequest.PageNumber}");
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/Plate/GetPlateItems?PageNumber={getPlateItemsRequest.PageNumber}&SortOrder={getPlateItemsRequest.SortOrder}");
             var httpClient = _httpClientFactory.CreateClient("CatalogApi");
 
             HttpResponseMessage httpResponseMessage;

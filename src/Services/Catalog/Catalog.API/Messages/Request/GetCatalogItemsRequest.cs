@@ -3,5 +3,6 @@
     public record GetPlateItemsRequest
     {
         public int? PageNumber { get; set; }
+        public string? SortOrder { get; set; }
     }
 }
