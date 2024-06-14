@@ -56,23 +56,26 @@ namespace Catalog.API.Data
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                // if only numbers assume age search
+                // If only numbers assume age search
                 if (int.TryParse(searchString, out var age))
                 {
-                    plates = plates.Where(s => s.Numbers.ToString().Contains(age.ToString()));
+                    plates = plates.Where(x => x.Numbers.ToString().Contains(age.ToString()));
                 }
                 else
                 {
-                    plates = plates.Where(s => !string.IsNullOrEmpty(s.Letters) && s.Letters.Contains(searchString));
+                    plates = plates.Where(x => !string.IsNullOrEmpty(x.Letters) && x.Letters.Contains(searchString));
                 }
+
+                // Filtered search we only want For Sale regs
+                plates = plates.Where(x => !x.IsReserved);
             }
 
             plates = sortOrder switch
             {
-                "registration_desc" => plates.OrderByDescending(s => s.Registration),
-                "PurchasePrice" => plates.OrderBy(s => s.PurchasePrice),
-                "price_desc" => plates.OrderByDescending(s => s.PurchasePrice),
-                _ => plates.OrderBy(s => s.Registration),
+                "registration_desc" => plates.OrderByDescending(x => x.Registration),
+                "PurchasePrice" => plates.OrderBy(x => x.PurchasePrice),
+                "price_desc" => plates.OrderByDescending(x => x.PurchasePrice),
+                _ => plates.OrderBy(x => x.Registration),
             };
 
             // Default to 20 if not set
