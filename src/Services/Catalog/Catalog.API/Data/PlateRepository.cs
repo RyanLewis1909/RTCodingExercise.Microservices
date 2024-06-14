@@ -20,7 +20,13 @@ namespace Catalog.API.Data
         public async Task CreatePlate(CreatePlateRequest createPlateRequest)
         {
             var letters = new string(createPlateRequest.Registration.Where(char.IsLetter).ToArray());
-            var numbers = int.Parse(Regex.Match(createPlateRequest.Registration, @"\d+").Value);
+            var getNumbers = Regex.Match(createPlateRequest.Registration, @"\d+").Value;
+            if (string.IsNullOrEmpty(getNumbers))
+            {
+                throw new Exception("Plate must contain numbers");
+            }
+
+            var numbers = int.Parse(getNumbers);
             var newPlate = new Plate
             {
                 Id = Guid.NewGuid(),
