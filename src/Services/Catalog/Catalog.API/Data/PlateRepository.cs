@@ -28,11 +28,17 @@ namespace Catalog.API.Data
                 PurchasePrice = createPlateRequest.PurchasePrice,
                 SalePrice = createPlateRequest.SalePrice,
                 Letters = letters,
-                Numbers = numbers
+                Numbers = numbers,
+                IsReserved = createPlateRequest.IsReserved
             };
 
             await _applicationDbContext.Plates.AddAsync(newPlate);
             await _applicationDbContext.SaveChangesAsync();
+        }
+
+        public async Task<Plate> GetPlate(Guid id)
+        {
+            return await _applicationDbContext.Plates.FirstAsync(x => x.Id == id);
         }
 
         public async Task<PaginatedList<Plate>> GetPlates(int? pageNumber, string? sortOrder, string? searchString, string? currentFilter)
@@ -72,6 +78,16 @@ namespace Catalog.API.Data
             // Default to 20 if not set
             var platePageSplit = _appSettings.PlatePageSplit ?? 20;
             return await PaginatedList<Plate>.CreateAsync(plates.AsNoTracking(), pageNumber ?? 1, platePageSplit);
+        }
+
+        public async Task UpdatePlate(UpdatePlateRequest updatePlateRequest)
+        {
+            var plate = await GetPlate(updatePlateRequest.Id);
+            plate.Registration = updatePlateRequest.Registration;
+            plate.PurchasePrice = updatePlateRequest.PurchasePrice;
+            plate.SalePrice = updatePlateRequest.SalePrice;
+            plate.IsReserved = updatePlateRequest.IsReserved;
+            await _applicationDbContext.SaveChangesAsync();
         }
     }
 }

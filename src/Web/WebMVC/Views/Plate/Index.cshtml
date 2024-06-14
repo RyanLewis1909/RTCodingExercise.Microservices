@@ -34,6 +34,9 @@
             <th>
                 SalePrice
             </th>
+            <th>
+                Status
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -48,6 +51,13 @@
                 </td>
                 <td>
                     £@Html.DisplayFor(modelItem => item.SalePrice)
+                </td>
+                <td>
+                    @Html.HiddenFor(modelItem => item.IsReserved)
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 </td>
             </tr>
         }

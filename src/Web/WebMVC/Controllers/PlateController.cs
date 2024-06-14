@@ -1,5 +1,6 @@
 ﻿using Catalog.API.Data;
 using Catalog.API.Messages.Request;
+using MassTransit;
 using WebMVC.Models;
 using WebMVC.Services;
 
@@ -31,13 +32,12 @@ namespace WebMVC.Controllers
             var model = new PaginatedList<PlateModel>();
             response.Plates.ForEach(x =>
             {
-                model.Add(new PlateModel    
+                model.Add(new PlateModel
                 {
                     Id = x.Id,
                     Registration = x.Registration,
                     PurchasePrice = x.PurchasePrice,
-                    Letters = x.Letters,
-                    Numbers = x.Numbers
+                    IsReserved = x.IsReserved
                 });
             });
             model.PageIndex = response.PageIndex;
@@ -58,7 +58,36 @@ namespace WebMVC.Controllers
             {
                 Registration = plate.Registration,
                 PurchasePrice = plate.PurchasePrice,
-                SalePrice = plate.SalePrice
+                SalePrice = plate.SalePrice,
+                IsReserved = plate.IsReserved
+            });
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var response = await _catalogService.GetPlate(id);
+            var model = new PlateModel
+            {
+                Id = response.Id,
+                Registration = response.Registration,
+                PurchasePrice = response.PurchasePrice,
+                IsReserved = response.IsReserved
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(PlateModel plate)
+        {
+            await _catalogService.UpdatePlate(new UpdatePlateRequest
+            {
+                Id= plate.Id,
+                Registration = plate.Registration,
+                PurchasePrice = plate.PurchasePrice,
+                SalePrice = plate.SalePrice,
+                IsReserved = plate.IsReserved
             });
             return RedirectToAction("Index");
         }

@@ -20,8 +20,11 @@ namespace WebMVC.Services
         public async Task CreatePlate(CreatePlateRequest createPlateRequest)
         {
             var httpRequestMessage = new HttpRequestMessage(
-                HttpMethod.Post, 
-                $"/api/Plate/?Registration={createPlateRequest.Registration}&PurchasePrice={createPlateRequest.PurchasePrice}&SalePrice={createPlateRequest.SalePrice}");
+                HttpMethod.Put,
+                $"/api/Plate/Create?Registration={createPlateRequest.Registration}" +
+                                $"&PurchasePrice={createPlateRequest.PurchasePrice}" +
+                                $"&SalePrice={createPlateRequest.SalePrice}" +
+                                $"&IsReserved={createPlateRequest.IsReserved}");
             var httpClient = _httpClientFactory.CreateClient("CatalogApi");
             HttpResponseMessage httpResponseMessage;
             try
@@ -48,10 +51,41 @@ namespace WebMVC.Services
             throw new Exception($"Api call unsuccessful. Http code {httpResponseMessage.StatusCode}");
         }
 
+        public async Task<Plate> GetPlate(Guid id)
+        {
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/Plate/GetPlate?id={id}");
+            var httpClient = _httpClientFactory.CreateClient("CatalogApi");
+
+            HttpResponseMessage httpResponseMessage;
+            try
+            {
+                httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Problem connecting to Catalog API {e}");
+            }
+
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                try
+                {
+                    string apiResponse = await httpResponseMessage.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<Plate>(apiResponse) ?? new Plate();
+                }
+                catch (JsonSerializationException e)
+                {
+                    throw new Exception($"Problem deserializing response {e}");
+                }
+            }
+
+            throw new Exception($"Api call unsuccessful. Http code {httpResponseMessage.StatusCode}");
+        }
+
         public async Task<GetPlateItemsResult> GetPlateItems(GetPlateItemsRequest getPlateItemsRequest)
         {
             var httpRequestMessage = new HttpRequestMessage(
-                HttpMethod.Get, 
+                HttpMethod.Get,
                 $"/api/Plate/GetPlateItems?PageNumber={getPlateItemsRequest.PageNumber}" +
                                             $"&SortOrder={getPlateItemsRequest.SortOrder}" +
                                             $"&SearchString={getPlateItemsRequest.SearchString}" +
@@ -74,6 +108,41 @@ namespace WebMVC.Services
                 {
                     string apiResponse = await httpResponseMessage.Content.ReadAsStringAsync();
                     return JsonConvert.DeserializeObject<GetPlateItemsResult>(apiResponse) ?? new GetPlateItemsResult();
+                }
+                catch (JsonSerializationException e)
+                {
+                    throw new Exception($"Problem deserializing response {e}");
+                }
+            }
+
+            throw new Exception($"Api call unsuccessful. Http code {httpResponseMessage.StatusCode}");
+        }
+
+        public async Task UpdatePlate(UpdatePlateRequest updatePlateRequest)
+        {
+            var httpRequestMessage = new HttpRequestMessage(
+                HttpMethod.Put,
+                $"/api/Plate/Update?Id={updatePlateRequest.Id}" +
+                                $"&Registration={updatePlateRequest.Registration}" +
+                                $"&PurchasePrice={updatePlateRequest.PurchasePrice}" +
+                                $"&SalePrice={updatePlateRequest.SalePrice}" +
+                                $"&IsReserved={updatePlateRequest.IsReserved}");
+            var httpClient = _httpClientFactory.CreateClient("CatalogApi");
+            HttpResponseMessage httpResponseMessage;
+            try
+            {
+                httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Problem connecting to Catalog API {e}");
+            }
+
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                try
+                {
+                    return;
                 }
                 catch (JsonSerializationException e)
                 {

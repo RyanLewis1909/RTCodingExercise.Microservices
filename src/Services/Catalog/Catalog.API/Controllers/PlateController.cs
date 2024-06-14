@@ -14,7 +14,36 @@ namespace Catalog.API.Controllers
             _plateRepository = plateRepository;
         }
 
-        [HttpPost]
+        [HttpGet("GetPlateItems")]
+        public async Task<ActionResult<GetPlateItemsResult>> GetPlateItems([FromQuery] GetPlateItemsRequest catalogItemsRequest)
+        {
+            var plates = await _plateRepository.GetPlates(catalogItemsRequest.PageNumber, catalogItemsRequest.SortOrder, catalogItemsRequest.SearchString, catalogItemsRequest.CurrentFilter);
+            if (plates == null)
+            {
+                return NotFound();
+            }
+
+            return new GetPlateItemsResult
+            {
+                Plates = plates,
+                PageIndex = plates.PageIndex,
+                TotalPages = plates.TotalPages
+            };
+        }
+
+        [HttpGet("GetPlate")]
+        public async Task<ActionResult<Plate>> GetPlateItems([FromQuery] Guid id)
+        {
+            var plate = await _plateRepository.GetPlate(id);
+            if (plate == null)
+            {
+                return NotFound();
+            }
+
+            return plate;
+        }
+
+        [HttpPut("Create")]
         public async Task<ActionResult> CreatePlate([FromQuery] CreatePlateRequest createPlateRequest)
         {
             try
@@ -29,20 +58,19 @@ namespace Catalog.API.Controllers
             return NoContent();
         }
 
-        [HttpGet("GetPlateItems")]
-        public async Task<ActionResult<GetPlateItemsResult>> GetPlateItems([FromQuery] GetPlateItemsRequest catalogItemsRequest)
+        [HttpPut("Update")]
+        public async Task<ActionResult> UpdatePlate([FromQuery] UpdatePlateRequest updatePlateRequest)
         {
-            var plates = await _plateRepository.GetPlates(catalogItemsRequest.PageNumber, catalogItemsRequest.SortOrder, catalogItemsRequest.SearchString, catalogItemsRequest.CurrentFilter);
-            if (plates == null)
+            try
             {
-                return NotFound();
+                await _plateRepository.UpdatePlate(updatePlateRequest);
+            }
+            catch (Exception)
+            {
+                return BadRequest("Failed to create new plate");
             }
 
-            return new GetPlateItemsResult { 
-                Plates = plates, 
-                PageIndex = plates.PageIndex,
-                TotalPages = plates.TotalPages
-            };
+            return NoContent();
         }
     }
 }
