@@ -15,8 +15,9 @@ namespace WebMVC.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int? pageNumber, string? sortOrder, string? searchString, string? currentFilter)
+        public async Task<IActionResult> Index(int? pageNumber, string? sortOrder, string? searchString, string? currentFilter, string? promoCode)
         {
+            ViewData["PromoCode"] = promoCode;
             ViewData["CurrentSort"] = sortOrder;
             ViewData["RegSortParm"] = string.IsNullOrEmpty(sortOrder) ? "registration_desc" : "";
             ViewData["PriceSortParm"] = sortOrder == "PurchasePrice" ? "price_desc" : "PurchasePrice";
@@ -35,6 +36,7 @@ namespace WebMVC.Controllers
                 {
                     Id = x.Id,
                     Registration = x.Registration,
+                    PromoCode = promoCode,
                     PurchasePrice = x.PurchasePrice,
                     IsReserved = x.IsReserved,
                     IsSold = x.IsSold
