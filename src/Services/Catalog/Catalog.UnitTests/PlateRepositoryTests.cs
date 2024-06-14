@@ -17,6 +17,7 @@ namespace Catalog.UnitTests
         private ApplicationDbContext _applicationDbContext;
         private AppSettings _appSettings;
         private CreatePlateRequest _createPlateRequest = new CreatePlateRequest { Registration = "T123T", IsReserved = false, IsSold = false, PurchasePrice = 10m, SalePrice = 20m };
+        private readonly Guid _id = Guid.NewGuid();
 
         public PlateRepositoryTests()
         {
@@ -69,6 +70,22 @@ namespace Catalog.UnitTests
             await Assert.ThrowsAsync<Exception>(act);
         }
 
+        [Fact]
+        public async Task GetPlate_WhenCalled_ReturnsPlate()
+        {
+            var plate = await _plateRepository.GetPlate(_id);
+
+            Assert.NotNull(plate);
+        }
+
+        [Fact]
+        public async Task GetPlate_WhenCalledWithNonExistantId_ThrowsException()
+        {
+            Func<Task> act = () => _plateRepository.GetPlate(new Guid());
+
+            await Assert.ThrowsAsync<InvalidOperationException>(act);
+        }
+
         private void SetupMocks()
         {
             // Db Context
@@ -89,7 +106,7 @@ namespace Catalog.UnitTests
             {
                 new Plate
                 {
-                    Id = Guid.NewGuid(),
+                    Id = _id,
                     Registration = "TREG1",
                     PurchasePrice = 123.12m
                 },
