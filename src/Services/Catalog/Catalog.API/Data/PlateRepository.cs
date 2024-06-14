@@ -78,9 +78,11 @@ namespace Catalog.API.Data
                 _ => plates.OrderBy(x => x.Registration),
             };
 
+            var totalSold = await _applicationDbContext.Plates.Where(x => x.IsSold).SumAsync(x => x.SalePrice);
+
             // Default to 20 if not set
             var platePageSplit = _appSettings.PlatePageSplit ?? 20;
-            return await PaginatedList<Plate>.CreateAsync(plates.AsNoTracking(), pageNumber ?? 1, platePageSplit);
+            return await PaginatedList<Plate>.CreateAsync(plates.AsNoTracking(), pageNumber ?? 1, platePageSplit, totalSold);
         }
 
         public async Task UpdatePlate(UpdatePlateRequest updatePlateRequest)
@@ -90,6 +92,7 @@ namespace Catalog.API.Data
             plate.PurchasePrice = updatePlateRequest.PurchasePrice;
             plate.SalePrice = updatePlateRequest.SalePrice;
             plate.IsReserved = updatePlateRequest.IsReserved;
+            plate.IsSold = updatePlateRequest.IsSold;
             await _applicationDbContext.SaveChangesAsync();
         }
     }

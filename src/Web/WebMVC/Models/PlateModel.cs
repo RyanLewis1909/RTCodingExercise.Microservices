@@ -18,6 +18,13 @@ namespace WebMVC.Models
         [Required]
         public bool IsReserved { get; set; }
 
-        public string Status => IsReserved ? "Reserved" : "For Sale";
+        [Required]
+        public bool IsSold { get; set; }
+
+        public string Status => IsSold 
+                                    ? "Sold" 
+                                    : IsReserved 
+                                        ? "Reserved" 
+                                        : "For Sale";
     }
 }

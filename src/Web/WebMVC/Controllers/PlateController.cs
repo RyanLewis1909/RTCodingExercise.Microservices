@@ -1,6 +1,5 @@
 ﻿using Catalog.API.Data;
 using Catalog.API.Messages.Request;
-using MassTransit;
 using WebMVC.Models;
 using WebMVC.Services;
 
@@ -37,11 +36,14 @@ namespace WebMVC.Controllers
                     Id = x.Id,
                     Registration = x.Registration,
                     PurchasePrice = x.PurchasePrice,
-                    IsReserved = x.IsReserved
+                    IsReserved = x.IsReserved,
+                    IsSold = x.IsSold
                 });
             });
             model.PageIndex = response.PageIndex;
             model.TotalPages = response.TotalPages;
+            model.TotalPages = response.TotalPages;
+            model.TotalSold = response.TotalSold;
             return View(model);
         }
 
@@ -59,7 +61,8 @@ namespace WebMVC.Controllers
                 Registration = plate.Registration,
                 PurchasePrice = plate.PurchasePrice,
                 SalePrice = plate.SalePrice,
-                IsReserved = plate.IsReserved
+                IsReserved = plate.IsReserved,
+                IsSold = plate.IsSold
             });
             return RedirectToAction("Index");
         }
@@ -67,13 +70,14 @@ namespace WebMVC.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
-            var response = await _catalogService.GetPlate(id);
+            var plate = await _catalogService.GetPlate(id);
             var model = new PlateModel
             {
-                Id = response.Id,
-                Registration = response.Registration,
-                PurchasePrice = response.PurchasePrice,
-                IsReserved = response.IsReserved
+                Id = plate.Id,
+                Registration = plate.Registration,
+                PurchasePrice = plate.PurchasePrice,
+                IsReserved = plate.IsReserved,
+                IsSold = plate.IsSold
             };
             return View(model);
         }
@@ -87,7 +91,8 @@ namespace WebMVC.Controllers
                 Registration = plate.Registration,
                 PurchasePrice = plate.PurchasePrice,
                 SalePrice = plate.SalePrice,
-                IsReserved = plate.IsReserved
+                IsReserved = plate.IsReserved,
+                IsSold = plate.IsSold
             });
             return RedirectToAction("Index");
         }

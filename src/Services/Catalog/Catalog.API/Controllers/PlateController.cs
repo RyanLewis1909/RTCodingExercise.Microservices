@@ -27,7 +27,8 @@ namespace Catalog.API.Controllers
             {
                 Plates = plates,
                 PageIndex = plates.PageIndex,
-                TotalPages = plates.TotalPages
+                TotalPages = plates.TotalPages,
+                TotalSold = plates.TotalSold
             };
         }
 
@@ -43,7 +44,7 @@ namespace Catalog.API.Controllers
             return plate;
         }
 
-        [HttpPut("Create")]
+        [HttpPost("Create")]
         public async Task<ActionResult> CreatePlate([FromQuery] CreatePlateRequest createPlateRequest)
         {
             try

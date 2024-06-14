@@ -20,11 +20,12 @@ namespace WebMVC.Services
         public async Task CreatePlate(CreatePlateRequest createPlateRequest)
         {
             var httpRequestMessage = new HttpRequestMessage(
-                HttpMethod.Put,
+                HttpMethod.Post,
                 $"/api/Plate/Create?Registration={createPlateRequest.Registration}" +
                                 $"&PurchasePrice={createPlateRequest.PurchasePrice}" +
                                 $"&SalePrice={createPlateRequest.SalePrice}" +
-                                $"&IsReserved={createPlateRequest.IsReserved}");
+                                $"&IsReserved={createPlateRequest.IsReserved}" +
+                                $"&IsSold={createPlateRequest.IsSold}");
             var httpClient = _httpClientFactory.CreateClient("CatalogApi");
             HttpResponseMessage httpResponseMessage;
             try
@@ -126,7 +127,8 @@ namespace WebMVC.Services
                                 $"&Registration={updatePlateRequest.Registration}" +
                                 $"&PurchasePrice={updatePlateRequest.PurchasePrice}" +
                                 $"&SalePrice={updatePlateRequest.SalePrice}" +
-                                $"&IsReserved={updatePlateRequest.IsReserved}");
+                                $"&IsReserved={updatePlateRequest.IsReserved}" +
+                                $"&IsSold={updatePlateRequest.IsSold}");
             var httpClient = _httpClientFactory.CreateClient("CatalogApi");
             HttpResponseMessage httpResponseMessage;
             try

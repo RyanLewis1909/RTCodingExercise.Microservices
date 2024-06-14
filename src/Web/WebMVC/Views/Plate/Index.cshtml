@@ -7,6 +7,7 @@
 }
 
 <h2>My Plates List</h2>
+<h2>Total sold: £@Model.TotalSold</h2>
 
 <p>
     @Html.ActionLink("Create New Plate", "Create")
@@ -54,6 +55,7 @@
                 </td>
                 <td>
                     @Html.HiddenFor(modelItem => item.IsReserved)
+                    @Html.HiddenFor(modelItem => item.IsSold)
                     @Html.DisplayFor(modelItem => item.Status)
                 </td>
                 <td>
