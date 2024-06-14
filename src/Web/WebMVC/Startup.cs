@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using AutoMapper;
+using MassTransit;
 using System.Net.Http.Headers;
 using WebMVC;
 using WebMVC.Services;
@@ -28,6 +29,12 @@ namespace RTCodingExercise.WebMVC
                 client.BaseAddress = new Uri(appSetting.CatalogBaseUrl);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             });
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

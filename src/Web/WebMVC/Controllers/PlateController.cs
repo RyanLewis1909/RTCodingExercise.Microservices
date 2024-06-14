@@ -1,5 +1,7 @@
-﻿using Catalog.API.Data;
+﻿using AutoMapper;
+using Catalog.API.Data;
 using Catalog.API.Messages.Request;
+using MassTransit;
 using WebMVC.Models;
 using WebMVC.Services;
 
@@ -7,11 +9,13 @@ namespace WebMVC.Controllers
 {
     public class PlateController : Controller
     {
-        ICatalogService _catalogService;
+        private readonly ICatalogService _catalogService;
+        private readonly IMapper _mapper;
 
-        public PlateController(ICatalogService catalogService)
+        public PlateController(ICatalogService catalogService, IMapper mapper)
         {
-            _catalogService = catalogService;
+            _catalogService = catalogService;   
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -29,19 +33,7 @@ namespace WebMVC.Controllers
                 CurrentFilter = currentFilter
             });
             ViewData["CurrentFilter"] = searchString ?? currentFilter;
-            var model = new PaginatedList<PlateModel>();
-            response.Plates.ForEach(x =>
-            {
-                model.Add(new PlateModel
-                {
-                    Id = x.Id,
-                    Registration = x.Registration,
-                    PromoCode = promoCode,
-                    PurchasePrice = x.PurchasePrice,
-                    IsReserved = x.IsReserved,
-                    IsSold = x.IsSold
-                });
-            });
+            var model = _mapper.Map<PaginatedList<PlateModel>>(response.Plates);
             model.PageIndex = response.PageIndex;
             model.TotalPages = response.TotalPages;
             model.TotalPages = response.TotalPages;
@@ -58,14 +50,8 @@ namespace WebMVC.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(PlateModel plate)
         {
-            await _catalogService.CreatePlate(new CreatePlateRequest
-            {
-                Registration = plate.Registration,
-                PurchasePrice = plate.PurchasePrice,
-                SalePrice = plate.SalePrice,
-                IsReserved = plate.IsReserved,
-                IsSold = plate.IsSold
-            });
+            var request = _mapper.Map<CreatePlateRequest>(plate);
+            await _catalogService.CreatePlate(request);
             return RedirectToAction("Index");
         }
 
@@ -73,29 +59,15 @@ namespace WebMVC.Controllers
         public async Task<IActionResult> Edit(Guid id)
         {
             var plate = await _catalogService.GetPlate(id);
-            var model = new PlateModel
-            {
-                Id = plate.Id,
-                Registration = plate.Registration,
-                PurchasePrice = plate.PurchasePrice,
-                IsReserved = plate.IsReserved,
-                IsSold = plate.IsSold
-            };
+            var model = _mapper.Map<PlateModel>(plate);
             return View(model);
         }
 
         [HttpPost]
         public async Task<IActionResult> Edit(PlateModel plate)
         {
-            await _catalogService.UpdatePlate(new UpdatePlateRequest
-            {
-                Id= plate.Id,
-                Registration = plate.Registration,
-                PurchasePrice = plate.PurchasePrice,
-                SalePrice = plate.SalePrice,
-                IsReserved = plate.IsReserved,
-                IsSold = plate.IsSold
-            });
+            var request = _mapper.Map<UpdatePlateRequest>(plate);
+            await _catalogService.UpdatePlate(request);
             return RedirectToAction("Index");
         }
     }
