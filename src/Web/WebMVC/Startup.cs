@@ -1,5 +1,7 @@
 ﻿using MassTransit;
-using RabbitMQ.Client;
+using System.Net.Http.Headers;
+using WebMVC;
+using WebMVC.Services;
 
 namespace RTCodingExercise.WebMVC
 {
@@ -18,33 +20,14 @@ namespace RTCodingExercise.WebMVC
             services.AddControllers();
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages().AddRazorRuntimeCompilation();
-
-            services.AddMassTransit(x =>
+            var appSetting = GetAppSettings(services);
+            services.AddSingleton(appSetting);
+            services.AddScoped<ICatalogService, CatalogService>();
+            services.AddHttpClient("CatalogApi", client =>
             {
-                //x.AddConsumer<ConsumerClass>();
-
-                //ADD CONSUMERS HERE
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.Host(Configuration["EventBusConnection"], "/", h =>
-                    {
-                        if (!string.IsNullOrEmpty(Configuration["EventBusUserName"]))
-                        {
-                            h.Username(Configuration["EventBusUserName"]);
-                        }
-
-                        if (!string.IsNullOrEmpty(Configuration["EventBusPassword"]))
-                        {
-                            h.Password(Configuration["EventBusPassword"]);
-                        }
-                    });
-
-                    cfg.ConfigureEndpoints(context);
-                    cfg.ExchangeType = ExchangeType.Fanout;
-                });
+                client.BaseAddress = new Uri(appSetting.CatalogBaseUrl);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             });
-
-            services.AddMassTransitHostedService();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,9 +54,26 @@ namespace RTCodingExercise.WebMVC
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Plate}/{action=Index}/{id?}");
                 endpoints.MapDefaultControllerRoute();
                 endpoints.MapControllers();
             });
+        }
+
+        private AppSettings GetAppSettings(IServiceCollection services)
+        {
+            var appSettingSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingSection);
+            var appSetting = appSettingSection.Get<AppSettings>();
+
+            if (!appSetting.IsValid(out var reason))
+            {
+                throw new Exception($"AppSettings section is not valid due to: {reason}");
+            }
+
+            return appSetting;
         }
     }
 }

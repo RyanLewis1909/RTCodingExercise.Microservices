@@ -1,6 +1,4 @@
-﻿using MassTransit;
-using Microsoft.OpenApi.Models;
-using RabbitMQ.Client;
+﻿using Microsoft.OpenApi.Models;
 
 namespace Catalog.API
 {
@@ -36,6 +34,7 @@ namespace Catalog.API
                 });
             });
 
+            var appSetting = GetAppSettings(services);
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
@@ -43,39 +42,15 @@ namespace Catalog.API
                     .SetIsOriginAllowed((host) => true)
                     .AllowAnyMethod()
                     .AllowAnyHeader()
-                    .AllowCredentials());
+                    .AllowCredentials()
+                    .WithOrigins(appSetting.WebAppBaseUrl));
             });
 
             services.AddControllers();
             services.AddControllersWithViews();
             services.AddRazorPages();
-
-            services.AddMassTransit(x =>
-            {
-                //x.AddConsumer<ConsumerClass>();
-
-                //ADD CONSUMERS HERE
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.Host(Configuration["EventBusConnection"], "/", h =>
-                    {
-                        if (!string.IsNullOrEmpty(Configuration["EventBusUserName"]))
-                        {
-                            h.Username(Configuration["EventBusUserName"]);
-                        }
-
-                        if (!string.IsNullOrEmpty(Configuration["EventBusPassword"]))
-                        {
-                            h.Password(Configuration["EventBusPassword"]);
-                        }
-                    });
-
-                    cfg.ConfigureEndpoints(context);
-                    cfg.ExchangeType = ExchangeType.Fanout;
-                });
-            });
-
-            services.AddMassTransitHostedService();
+            services.AddSingleton(appSetting);
+            services.AddScoped<IPlateRepository, PlateRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -122,6 +97,20 @@ namespace Catalog.API
                 endpoints.MapDefaultControllerRoute();
                 endpoints.MapControllers();
             });
+        }
+
+        private AppSettings GetAppSettings(IServiceCollection services)
+        {
+            var appSettingSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingSection);
+            var appSetting = appSettingSection.Get<AppSettings>();
+
+            if (!appSetting.IsValid(out var reason))
+            {
+                throw new Exception($"AppSettings section is not valid due to: {reason}");
+            }
+
+            return appSetting;
         }
     }
 }

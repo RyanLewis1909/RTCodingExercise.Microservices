@@ -36,6 +36,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\..\BuildingBlocks\EventBus\IntegrationEvents\IntegrationEvents.csproj" />
 	  <ProjectReference Include="..\..\..\BuildingBlocks\New folder\WebHost.Customization\WebHost.Customization.csproj" />
 	  <ProjectReference Include="..\Catalog.Domain\Catalog.Domain.csproj" />
 	</ItemGroup>
