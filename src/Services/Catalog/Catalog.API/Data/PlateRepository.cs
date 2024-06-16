@@ -42,9 +42,20 @@ namespace Catalog.API.Data
             await _applicationDbContext.SaveChangesAsync();
         }
 
+        public async Task CreatePlateAudit(PlateAudit newPlateAudit)
+        {
+            await _applicationDbContext.PlateAudits.AddAsync(newPlateAudit);
+            await _applicationDbContext.SaveChangesAsync();
+        }
+
         public async Task<Plate> GetPlate(Guid id)
         {
             return await _applicationDbContext.Plates.FirstAsync(x => x.Id == id);
+        }
+
+        public async Task<ActionResult<List<PlateAudit>>> GetPlateAudits(Guid id)
+        {
+            return await _applicationDbContext.PlateAudits.Where(x => x.TableId == id).ToListAsync();
         }
 
         public async Task<PaginatedList<Plate>> GetPlates(int? pageNumber, string? sortOrder, string? searchString, string? currentFilter)

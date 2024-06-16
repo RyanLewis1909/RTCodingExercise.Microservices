@@ -8,5 +8,6 @@
         }
 
         public DbSet<Plate> Plates { get; set; }
+        public DbSet<PlateAudit> PlateAudits { get; set; }
     }
 }

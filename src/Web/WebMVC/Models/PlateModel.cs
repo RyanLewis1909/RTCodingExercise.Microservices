@@ -53,6 +53,8 @@ namespace WebMVC.Models
         [Required]
         public bool IsReserved { get; set; }
 
+        public bool OriginalIsReserved { get; set; }
+
         [Required]
         public bool IsSold { get; set; }
 

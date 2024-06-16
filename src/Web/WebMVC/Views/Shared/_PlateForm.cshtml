@@ -21,6 +21,7 @@
 </div>
 
 <div class="form-group">
+    @Html.HiddenFor(model => model.OriginalIsReserved)
     @Html.LabelFor(model => model.IsReserved, htmlAttributes: new { @class = "control-label col-md-2" })
     <div class="col-md-10">
         @Html.CheckBoxFor(model => model.IsReserved, new { htmlAttributes = new { @class = "form-control" } })

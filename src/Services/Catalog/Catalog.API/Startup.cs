@@ -1,4 +1,7 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Catalog.API.Consumer;
+using MassTransit;
+using Microsoft.OpenApi.Models;
+using RabbitMQ.Client;
 
 namespace Catalog.API
 {
@@ -49,6 +52,31 @@ namespace Catalog.API
             services.AddControllers();
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            services.AddMassTransit(x =>
+            {
+                x.AddConsumer<CreatePlateAuditConsumer>();
+
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(appSetting.EventBusConnection, "/", h =>
+                    {
+                        if (!string.IsNullOrEmpty(appSetting.EventBusUserName))
+                        {
+                            h.Username(appSetting.EventBusUserName);
+                        }
+
+                        if (!string.IsNullOrEmpty(appSetting.EventBusPassword))
+                        {
+                            h.Password(appSetting.EventBusPassword);
+                        }
+                    });
+                    cfg.ConfigureEndpoints(context);
+                    cfg.ExchangeType = ExchangeType.Fanout;
+                });
+            });
+
+            services.AddMassTransitHostedService();
             services.AddSingleton(appSetting);
             services.AddScoped<IPlateRepository, PlateRepository>();
         }

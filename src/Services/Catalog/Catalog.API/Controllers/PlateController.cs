@@ -44,6 +44,18 @@ namespace Catalog.API.Controllers
             return plate;
         }
 
+        [HttpGet("GetPlateAudits")]
+        public async Task<ActionResult<List<PlateAudit>>> GetPlateAudits([FromQuery] Guid id)
+        {
+            var plates = await _plateRepository.GetPlateAudits(id);
+            if (plates == null)
+            {
+                return NotFound();
+            }
+
+            return plates;
+        }
+
         [HttpPost("Create")]
         public async Task<ActionResult> CreatePlate([FromQuery] CreatePlateRequest createPlateRequest)
         {

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MassTransit;
+using RabbitMQ.Client;
 using System.Net.Http.Headers;
 using WebMVC;
 using WebMVC.Services;
@@ -22,6 +23,29 @@ namespace RTCodingExercise.WebMVC
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages().AddRazorRuntimeCompilation();
             var appSetting = GetAppSettings(services);
+
+            services.AddMassTransit(x =>
+            {
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(appSetting.EventBusConnection, "/", h =>
+                    {
+                        if (!string.IsNullOrEmpty(appSetting.EventBusUserName))
+                        {
+                            h.Username(appSetting.EventBusUserName);
+                        }
+
+                        if (!string.IsNullOrEmpty(appSetting.EventBusPassword))
+                        {
+                            h.Password(appSetting.EventBusPassword);
+                        }
+                    });
+                    cfg.ConfigureEndpoints(context);
+                    cfg.ExchangeType = ExchangeType.Fanout;
+                });
+            });
+
+            services.AddMassTransitHostedService();
             services.AddSingleton(appSetting);
             services.AddScoped<ICatalogService, CatalogService>();
             services.AddHttpClient("CatalogApi", client =>

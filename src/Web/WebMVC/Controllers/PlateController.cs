@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using Catalog.API.Data;
 using Catalog.API.Messages.Request;
+using IntegrationEvents;
 using MassTransit;
+using MassTransit.Transports;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using WebMVC.Models;
 using WebMVC.Services;
 
@@ -11,11 +14,13 @@ namespace WebMVC.Controllers
     {
         private readonly ICatalogService _catalogService;
         private readonly IMapper _mapper;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public PlateController(ICatalogService catalogService, IMapper mapper)
+        public PlateController(ICatalogService catalogService, IMapper mapper, IPublishEndpoint publishEndpoint)
         {
             _catalogService = catalogService;   
             _mapper = mapper;
+            _publishEndpoint = publishEndpoint;
         }
 
         [HttpGet]
@@ -50,6 +55,7 @@ namespace WebMVC.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(PlateModel plate)
         {
+            await AuditPlateChange(plate, "Create");
             var request = _mapper.Map<CreatePlateRequest>(plate);
             await _catalogService.CreatePlate(request);
             return RedirectToAction("Index");
@@ -60,15 +66,43 @@ namespace WebMVC.Controllers
         {
             var plate = await _catalogService.GetPlate(id);
             var model = _mapper.Map<PlateModel>(plate);
+            model.OriginalIsReserved = model.IsReserved;
             return View(model);
         }
 
         [HttpPost]
         public async Task<IActionResult> Edit(PlateModel plate)
         {
+            await AuditPlateChange(plate, "Edit");
             var request = _mapper.Map<UpdatePlateRequest>(plate);
             await _catalogService.UpdatePlate(request);
             return RedirectToAction("Index");
+        }
+
+        private async Task AuditPlateChange(PlateModel plate, string from)
+        {
+            var oldValue = string.Empty;
+            switch (from)
+            {
+                case "Create":
+                    oldValue = "Added";
+                    break;
+                default:
+                    oldValue = plate.OriginalIsReserved.ToString();
+                    break;
+            }
+
+            if (from == "Create" || plate.OriginalIsReserved != plate.IsReserved)
+            {
+                await _publishEndpoint.Publish<CreatePlateAudit>(new
+                {
+                    Table = "Plate",
+                    TableId = plate.Id,
+                    Field = "IsReserved",
+                    OldValue = oldValue,
+                    NewValue = plate.IsReserved,
+                });
+            }
         }
     }
 }
